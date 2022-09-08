@@ -5,15 +5,19 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import jm.task.core.jdbc.model.User;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-public class Util {
+public final class Util {
     private static final String BD_URL = "jdbc:mysql://localhost/myschema";
     private static final String BD_USER = "root";
     private static final String BD_PASSWORD = "root";
 
+    private static Util util;
+    private static SessionFactory sessionFactory;
+    private Util() {
+
+    }
     public static Connection getConnection() {
         Connection connection = null;
         try {
@@ -24,8 +28,20 @@ public class Util {
         return connection;
     }
 
-    public static Configuration getConfiguration() {
-         return new Configuration().addAnnotatedClass(User.class);
+    public static Util getInstance() {
+        if (util == null) {
+            util = new Util();
+        }
+        return util;
+    }
+    
+
+    public static SessionFactory getSessionFactory() {
+        if (sessionFactory == null) {
+            Configuration conf = new Configuration().addAnnotatedClass(User.class);
+            sessionFactory = conf.buildSessionFactory();
+        }
+        return sessionFactory;
     }
 
 
