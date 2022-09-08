@@ -15,9 +15,8 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     private void commandToBD(String sqlCommand) {
-        Connection conn = Util.getConnection();
-        try {
-            Statement statement = conn.createStatement();
+        try (Connection conn = Util.getConnection();
+             Statement statement = conn.createStatement()) {
             statement.executeUpdate(sqlCommand);
         } catch (SQLException e) {
             System.out.println("Connection failed :c");
@@ -39,15 +38,16 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void createUsersTable() {
         //System.out.println("Database is creating...");
-        try (Connection conn = Util.getConnection()) {
+        try (Connection conn = Util.getConnection()){
             if (isTableExists(conn)) {
-                Statement statement = conn.createStatement();
-                statement.executeUpdate(String.format("CREATE TABLE %s (" +
-                                "Id BIGINT PRIMARY KEY AUTO_INCREMENT, " +
-                                "Name VARCHAR(30), " +
-                                "LastName VARCHAR(30), " +
-                                "Age TINYINT UNSIGNED)",
-                        NAME_DB));
+                try(Statement statement = conn.createStatement()) {
+                    statement.executeUpdate(String.format("CREATE TABLE %s (" +
+                                    "Id BIGINT PRIMARY KEY AUTO_INCREMENT, " +
+                                    "Name VARCHAR(30), " +
+                                    "LastName VARCHAR(30), " +
+                                    "Age TINYINT UNSIGNED)",
+                            NAME_DB));
+                }
             }
         } catch (SQLException e) {
             System.out.println("Connection failed :c createUsersTable()");
@@ -59,8 +59,9 @@ public class UserDaoJDBCImpl implements UserDao {
         //System.out.println("Database is dropping...");
         try (Connection conn = Util.getConnection()) {
             if (!isTableExists(conn)) {
-                Statement statement = conn.createStatement();
-                statement.executeUpdate("DROP TABLE " + NAME_DB);
+                try (Statement statement = conn.createStatement()) {
+                    statement.executeUpdate("DROP TABLE " + NAME_DB);
+                }
             }
         } catch (SQLException e) {
             System.out.println("Connection failed :c dropUsersTable()");
@@ -89,8 +90,8 @@ public class UserDaoJDBCImpl implements UserDao {
         List<User> usersList = new ArrayList<>();
         String sqlCommand = String.format("SELECT * FROM %s", NAME_DB);
 
-        try (Connection conn = Util.getConnection();) {
-            Statement statement = conn.createStatement();
+        try (Connection conn = Util.getConnection();
+             Statement statement = conn.createStatement()) {
             ResultSet resultSet = statement.executeQuery(sqlCommand);
             while (resultSet.next()) {
                 usersList.add(new User(
