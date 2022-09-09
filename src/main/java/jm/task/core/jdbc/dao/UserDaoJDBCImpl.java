@@ -24,49 +24,20 @@ public class UserDaoJDBCImpl implements UserDao {
         }
     }
 
-    static boolean isTableExists(Connection connection) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                "SELECT count(*) FROM information_schema.tables WHERE 1 " +
-                        "AND TABLE_NAME=?" +
-                        "AND TABLE_SCHEMA='myschema' LIMIT 1;");
-        preparedStatement.setString(1, NAME_DB);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        resultSet.next();
-        boolean result = resultSet.getInt(1) == 0;
-        return result;
-    }
 
     public void createUsersTable() {
         //System.out.println("Database is creating...");
-        try (Connection conn = Util.getConnection()){
-            if (isTableExists(conn)) {
-                try(Statement statement = conn.createStatement()) {
-                    statement.executeUpdate(String.format("CREATE TABLE %s (" +
-                                    "Id BIGINT PRIMARY KEY AUTO_INCREMENT, " +
-                                    "Name VARCHAR(30), " +
-                                    "LastName VARCHAR(30), " +
-                                    "Age TINYINT UNSIGNED)",
-                            NAME_DB));
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Connection failed :c createUsersTable()");
-            throw new RuntimeException(e);
-        }
+        commandToBD(String.format("CREATE TABLE IF NOT EXISTS %s (" +
+                        "Id BIGINT PRIMARY KEY AUTO_INCREMENT, " +
+                        "Name VARCHAR(30), " +
+                        "LastName VARCHAR(30), " +
+                        "Age TINYINT UNSIGNED)",
+                NAME_DB));
     }
 
     public void dropUsersTable() {
         //System.out.println("Database is dropping...");
-        try (Connection conn = Util.getConnection()) {
-            if (!isTableExists(conn)) {
-                try (Statement statement = conn.createStatement()) {
-                    statement.executeUpdate("DROP TABLE " + NAME_DB);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Connection failed :c dropUsersTable()");
-            throw new RuntimeException(e);
-        }
+        commandToBD("DROP TABLE IF EXISTS " + NAME_DB);
     }
 
     public void saveUser(String name, String lastName, byte age) {
