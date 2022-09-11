@@ -12,8 +12,6 @@ public final class Util {
     private static final String BD_URL = "jdbc:mysql://localhost/myschema";
     private static final String BD_USER = "root";
     private static final String BD_PASSWORD = "root";
-
-    private static Util util;
     private static SessionFactory sessionFactory;
     private Util() {
 
@@ -28,13 +26,6 @@ public final class Util {
         return connection;
     }
 
-    public static Util getInstance() {
-        if (util == null) {
-            util = new Util();
-        }
-        return util;
-    }
-    
 
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
